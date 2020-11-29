@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+      "target": "ES2017",
+      "moduleResolution": "node",
+      "module": "commonjs",
+      "declaration": false,
+      "sourceMap": true,
+      "noImplicitReturns": false,
+      "noImplicitUseStrict": false,
+      "outDir": "./dist",
+      "listFiles": false,
+      "rootDir": "src",
+      "noImplicitAny": true,
+      "esModuleInterop": true
+  },
+  "include": ["src/**/*", "test"],
+  "exclude": ["node_modules", "test"],
+  "compileOnSave": false
+}
