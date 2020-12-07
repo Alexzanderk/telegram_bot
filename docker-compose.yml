@@ -1,0 +1,9 @@
+version: "2.4"
+
+services:
+  seven_bot:
+    build: .
+    container_name: seven_bot
+    ports:
+      - 80:80
+    restart: always
