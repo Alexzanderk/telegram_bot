@@ -1,4 +1,7 @@
 import RedisIO = require('ioredis');
+import { config } from 'dotenv';
+
+config();
 
 const redisOpts: RedisIO.RedisOptions = {
   retryStrategy: (times: number) => Math.min(times * 10000, 15000),
