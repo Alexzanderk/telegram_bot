@@ -10,7 +10,7 @@ export const oftenCommands = async (cxt: TelegrafContext, next: () => Promise<vo
       return next();
     }
 
-    await redisInstance.setExpireToRedis(message, {}, 60 * 15);
+    await redisInstance.setExpireToRedis(message, {}, 60 * 30);
   }
 
   return next();
