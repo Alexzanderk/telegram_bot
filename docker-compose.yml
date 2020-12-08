@@ -1,9 +1,29 @@
-version: "2.4"
+version: '2.4'
+
+networks:
+  botnet:
+    driver: bridge
 
 services:
   seven_bot:
     build: .
+    image: seven/bot
+    networks:
+      - botnet
     container_name: seven_bot
     ports:
       - 80:80
     restart: always
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    expose:
+      - 6379
+    container_name: redis-serve
+    restart: always
+    networks:
+      - botnet
