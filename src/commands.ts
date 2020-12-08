@@ -28,4 +28,8 @@ https://index.ukrposhta.ua/find-post-index
 Это наше почтовое отделение на карте:
 https://goo.gl/maps/AuUEF4iugWe6KnDK7
   `,
+  keys: `
+Ключи для первого дома писать @olyagarinova
+Ключи для второго дома писать @d_naumenko
+  `,
 };

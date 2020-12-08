@@ -3,8 +3,8 @@ import RedisIO from 'ioredis';
 
 interface IRedis {
   getFromRedis(key: string): Promise<any>;
+  keyExists(key: string): Promise<any>;
   setExpireToRedis(key: string, data: any, ttl?: number): Promise<string>;
-  
 }
 
 export class Redis implements IRedis {
@@ -24,6 +24,14 @@ export class Redis implements IRedis {
     }
   }
 
+  public async keyExists(key: string): Promise<any> {
+    try {
+      return await this.redis.exists(key);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   public async setExpireToRedis(key: string, data: any, ttl?: number): Promise<string> {
     try {
       const dataStringify = JSON.stringify(data);
@@ -33,3 +41,5 @@ export class Redis implements IRedis {
     }
   }
 }
+
+export const redisInstance = new Redis();
