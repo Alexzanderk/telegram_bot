@@ -10,8 +10,6 @@ const MONGODB_HOST: string = process.env.MONGODB_HOST;
 const MONGODB_DB: string = process.env.MONGODB_DB;
 const CONNECTION_STRING: string = MONGODB_HOST + '/' + MONGODB_DB;
 
-console.log({ MONGODB_USER, MONGODB_PASS, MONGODB_HOST, MONGODB_DB, CONNECTION_STRING });
-
 export const connect = (url: string = CONNECTION_STRING) => {
   mongoose
     .connect(url, {
@@ -20,9 +18,6 @@ export const connect = (url: string = CONNECTION_STRING) => {
       user: MONGODB_USER,
       pass: MONGODB_PASS,
       authSource: 'admin',
-    })
-    .then(() => {
-      console.log('CONNNECTED');
     })
     .catch((err) => {
       console.error(err);
