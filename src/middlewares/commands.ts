@@ -1,5 +1,6 @@
 import { TelegrafContext } from 'telegraf/typings/context';
 import { redisInstance } from '../lib/redis';
+import { TTL } from '../constants';
 
 export const oftenCommands = async (cxt: TelegrafContext, next: () => Promise<void>) => {
   if (cxt.chat.type === 'supergroup') {
@@ -10,7 +11,7 @@ export const oftenCommands = async (cxt: TelegrafContext, next: () => Promise<vo
       return next();
     }
 
-    await redisInstance.setExpireToRedis(message, {}, 60 * 30);
+    await redisInstance.setExpireToRedis(message, {}, TTL);
   }
 
   return next();
