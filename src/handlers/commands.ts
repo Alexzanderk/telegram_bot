@@ -106,5 +106,9 @@ export const isPrivate = (ctx: TelegrafContext): boolean => {
 };
 
 export const removeMessage = async (ctx: TelegrafContext) => {
-  return await ctx.telegram.deleteMessage(ctx.chat.id, ctx.message.message_id);
+  try {
+    return await ctx.telegram.deleteMessage(ctx.chat.id, ctx.message.message_id);
+  } catch (error) {
+    console.log(error);
+  }
 };
