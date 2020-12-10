@@ -5,7 +5,7 @@ import { bot } from '../bot';
 import path from 'path';
 
 const startMessage = `
-Привет! Это бот, который поможет ответить на уже известные вопросы.
+Привет! Это бот, который поможет ответить на уже известные вопросы, а также сообщить о ЧП в ЖК.
 Сейчас бот знает эти команды:
 /start Все команды
 /index Почтовый интдекс ЖК
@@ -13,6 +13,7 @@ const startMessage = `
 /providers Интернет провайдеры в ЖК
 /price Цены услуг ЖЭКа
 /keys Ключи для лифтов, колясочной, входной двери
+/emergency ЧП в ЖК теперь можно отправить в ЖЭК при вызове команды вы получите инструкцию как сообщить о ЧП
 `;
 
 export const handleStartCommand = async (ctx: TelegrafContext) => {
@@ -79,4 +80,19 @@ export const handleKeysCommand = (ctx: TelegrafContext) => {
   }
 
   ctx.reply(commands.keys, { reply_to_message_id: ctx.message.message_id });
+};
+
+export const handleEmergency = async (ctx: TelegrafContext) => {
+  if (isPrivate(ctx)) {
+    return ctx.telegram.sendMessage(ctx.from.id, commands.emergency);
+  }
+  await bot.telegram.deleteMessage(ctx.chat.id, ctx.message.message_id).catch(console.log);
+  return ctx.telegram.sendMessage(ctx.from.id, commands.emergency);
+};
+
+export const isPrivate = (ctx: TelegrafContext): boolean => {
+  if (ctx.chat.type === 'private') {
+    return true;
+  }
+  return false;
 };

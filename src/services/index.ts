@@ -1,2 +1,2 @@
 export { redis } from './Redis';
-export { connect } from './db';
+// export { connect } from './db';
