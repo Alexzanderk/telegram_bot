@@ -18,29 +18,36 @@ const startMessage = `
 
 export const handleStartCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
+    await removeMessage(ctx);
     return ctx.telegram.sendMessage(ctx.from.id, startMessage);
   }
   ctx.reply(startMessage);
 };
 
-export const handleIndexCommand = (ctx: TelegrafContext) => {
+export const handleIndexCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
+    await removeMessage(ctx);
+
     return ctx.telegram.sendMessage(ctx.from.id, commands.index);
   }
 
   ctx.reply(commands.index, { reply_to_message_id: ctx.message.message_id });
 };
 
-export const handleContactsCommand = (ctx: TelegrafContext) => {
+export const handleContactsCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
+    await removeMessage(ctx);
+
     return ctx.telegram.sendMessage(ctx.from.id, commands.contacts);
   }
 
   ctx.reply(commands.contacts, { reply_to_message_id: ctx.message.message_id });
 };
 
-export const handleProvidersCommand = (ctx: TelegrafContext) => {
+export const handleProvidersCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
+    await removeMessage(ctx);
+
     return ctx.telegram.sendMessage(ctx.from.id, commands.providers);
   }
 
@@ -54,6 +61,8 @@ export const handlePriceCommand = async (ctx: TelegrafContext) => {
     const file = readFileSync(path.resolve(__dirname, '..', '..', 'prices.jpg'));
 
     if ((ctx as any)?.state?.onPause) {
+      await removeMessage(ctx);
+
       bot.telegram.sendPhoto(ctx.from.id, {
         source: file,
       });
@@ -74,8 +83,10 @@ export const handlePriceCommand = async (ctx: TelegrafContext) => {
   }
 };
 
-export const handleKeysCommand = (ctx: TelegrafContext) => {
+export const handleKeysCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
+    await removeMessage(ctx);
+
     return ctx.telegram.sendMessage(ctx.from.id, commands.keys);
   }
 
@@ -91,8 +102,9 @@ export const handleEmergency = async (ctx: TelegrafContext) => {
 };
 
 export const isPrivate = (ctx: TelegrafContext): boolean => {
-  if (ctx.chat.type === 'private') {
-    return true;
-  }
-  return false;
+  return ctx?.chat?.type === 'private';
+};
+
+export const removeMessage = async (ctx: TelegrafContext) => {
+  return await ctx.telegram.deleteMessage(ctx.chat.id, ctx.message.message_id);
 };
