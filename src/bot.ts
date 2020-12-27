@@ -16,11 +16,16 @@ import { handleEmergency, isPrivate } from './handlers/commands';
 
 config();
 
+export interface MessageQueue {
+  msg: number;
+  chat: number;
+}
+
 const BOT_TOKEN: string = process.env.BOT_TOKEN;
-export let queue: number[] = [];
+export let queue: MessageQueue[] = [];
 export const bot = new Telegraf(BOT_TOKEN, { username: 'seven' });
 
-const res = bot.telegram.getUpdates();
+// const res = bot.telegram.getUpdates();
 
 bot.use(oftenCommands);
 
@@ -48,20 +53,48 @@ bot.hears(/\#чпжэк/gim, (cxt) => {
   cxt.telegram.forwardMessage(process.env.TELEGRAM_ACTIVE_GROUP, cxt.chat.id, cxt.message.message_id);
 });
 
+bot.on('new_chat_members', (ctx) => {
+  ctx.reply(`
+Привет👋🏻 сосед!
+Это бот, который поможет ответить на уже известные вопросы, а также сообщить о ЧП в ЖК.
+Сейчас бот знает эти команды:
+/start Все команды
+/index Почтовый интдекс ЖК
+/contacts Контакты ЖЭКа
+/providers Интернет провайдеры в ЖК
+/price Цены услуг ЖЭКа
+/keys Ключи для лифтов, колясочной, входной двери
+/emergency ЧП в ЖК теперь можно отправить в ЖЭК при вызове команды вы получите инструкцию как сообщить о ЧП, но для этого необходимо добавить в личную переписку
+
+Мы будем рады если ты начнешь личное общение с ботом, чтобы не спамить в общей группе!
+`);
+});
+
+bot.catch((err: any) => {
+  console.log(err);
+  console.log('CATCH');
+});
+
 bot.launch().then(() => {
   console.log('Bot started');
 });
+
+let isActive = false;
 
 setInterval(async () => {
   try {
     if (!queue.length) return;
 
-    const pendings = queue.map(async (msg) => {
-      bot.telegram.deleteMessage(process.env.TELEGRAM_PRIVATE_GROUP, msg);
+    if (isActive) return;
+    isActive = true;
+    let queuePart = [...queue];
+    queue = [];
+    const pendings = queuePart.map(async (item) => {
+      bot.telegram.deleteMessage(item.chat, item.msg);
     });
     await Promise.all(pendings);
-
-    queue = [];
+    queuePart = [];
+    isActive = false;
   } catch (error) {
     console.log('INTERVAL');
     console.log(error);
