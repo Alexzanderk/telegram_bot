@@ -1,7 +1,7 @@
 import { TelegrafContext } from 'telegraf/typings/context';
 import { commands } from '../commands';
 import { readFileSync } from 'fs';
-import { bot } from '../bot';
+import { bot, queue } from '../bot';
 import path from 'path';
 
 const startMessage = `
@@ -13,22 +13,42 @@ const startMessage = `
 /providers Интернет провайдеры в ЖК
 /price Цены услуг ЖЭКа
 /keys Ключи для лифтов, колясочной, входной двери
-/emergency ЧП в ЖК теперь можно отправить в ЖЭК при вызове команды вы получите инструкцию как сообщить о ЧП
+/emergency ЧП в ЖК теперь можно отправить в ЖЭК при вызове команды вы получите инструкцию как сообщить о ЧП, но для этого необходимо добавить в личную переписку
+`;
+
+const code403 = `
+Привет! Кажется слишком много одинаковых запросов в общей группе за короткий промежуток времени, чтобы не мусорить в группе я могу отправить информацию лично, но для этого необходимо начать со мной общение. Кликни по этой ссылке и я постараюсь тебе помочь @seven_security_bot.
+Сообщения удаляются автоматически.
 `;
 
 export const handleStartCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
-    await removeMessage(ctx);
-    return ctx.telegram.sendMessage(ctx.from.id, startMessage);
+    try {
+      await removeMessageAddToQueue(ctx);
+
+      return await ctx.telegram.sendMessage(ctx.from.id, startMessage);
+    } catch (error) {
+      if (error.code === 403) {
+        return handleForbiden(ctx, queue);
+      }
+      console.log(error);
+    }
   }
   ctx.reply(startMessage);
 };
 
 export const handleIndexCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
-    await removeMessage(ctx);
+    try {
+      await removeMessageAddToQueue(ctx);
 
-    return ctx.telegram.sendMessage(ctx.from.id, commands.index);
+      return ctx.telegram.sendMessage(ctx.from.id, commands.index);
+    } catch (error) {
+      if (error.code === 403) {
+        return handleForbiden(ctx, queue);
+      }
+      console.log(error);
+    }
   }
 
   ctx.reply(commands.index, { reply_to_message_id: ctx.message.message_id });
@@ -36,9 +56,16 @@ export const handleIndexCommand = async (ctx: TelegrafContext) => {
 
 export const handleContactsCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
-    await removeMessage(ctx);
+    try {
+      await removeMessageAddToQueue(ctx);
 
-    return ctx.telegram.sendMessage(ctx.from.id, commands.contacts);
+      return ctx.telegram.sendMessage(ctx.from.id, commands.contacts);
+    } catch (error) {
+      if (error.code === 403) {
+        return handleForbiden(ctx, queue);
+      }
+      console.log(error);
+    }
   }
 
   ctx.reply(commands.contacts, { reply_to_message_id: ctx.message.message_id });
@@ -46,9 +73,16 @@ export const handleContactsCommand = async (ctx: TelegrafContext) => {
 
 export const handleProvidersCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
-    await removeMessage(ctx);
+    try {
+      await removeMessageAddToQueue(ctx);
 
-    return ctx.telegram.sendMessage(ctx.from.id, commands.providers);
+      return ctx.telegram.sendMessage(ctx.from.id, commands.providers);
+    } catch (error) {
+      if (error.code === 403) {
+        return handleForbiden(ctx, queue);
+      }
+      console.log(error);
+    }
   }
 
   ctx.reply(commands.providers, { reply_to_message_id: ctx.message.message_id });
@@ -61,7 +95,7 @@ export const handlePriceCommand = async (ctx: TelegrafContext) => {
     const file = readFileSync(path.resolve(__dirname, '..', '..', 'prices.jpg'));
 
     if ((ctx as any)?.state?.onPause) {
-      await removeMessage(ctx);
+      await removeMessageAddToQueue(ctx);
 
       bot.telegram.sendPhoto(ctx.from.id, {
         source: file,
@@ -85,9 +119,16 @@ export const handlePriceCommand = async (ctx: TelegrafContext) => {
 
 export const handleKeysCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
-    await removeMessage(ctx);
+    try {
+      await removeMessageAddToQueue(ctx);
 
-    return ctx.telegram.sendMessage(ctx.from.id, commands.keys);
+      return ctx.telegram.sendMessage(ctx.from.id, commands.keys);
+    } catch (error) {
+      if (error.code === 403) {
+        return handleForbiden(ctx, queue);
+      }
+      console.log(error);
+    }
   }
 
   ctx.reply(commands.keys, { reply_to_message_id: ctx.message.message_id });
@@ -105,10 +146,17 @@ export const isPrivate = (ctx: TelegrafContext): boolean => {
   return ctx?.chat?.type === 'private';
 };
 
-export const removeMessage = async (ctx: TelegrafContext) => {
+export const removeMessageAddToQueue = async (ctx: TelegrafContext) => {
   try {
-    return await ctx.telegram.deleteMessage(ctx.chat.id, ctx.message.message_id);
+    queue.push(ctx.message.message_id);
+
+    // return await ctx.telegram.deleteMessage(ctx.chat.id, ctx.message.message_id);
   } catch (error) {
     console.log(error);
   }
+};
+
+const handleForbiden = async (ctx: TelegrafContext, queueLink: number[]) => {
+  const msg = await ctx.reply(code403, { reply_to_message_id: ctx.message.message_id });
+  queueLink.push(msg.message_id);
 };
