@@ -1,4 +1,5 @@
 import { config } from 'dotenv';
+import moment from 'moment';
 import { Telegraf } from 'telegraf';
 import { regex } from './constants';
 import { oftenCommands } from './middlewares/commands';
@@ -81,11 +82,23 @@ bot.launch().then(() => {
 
 let isActive = false;
 
+let time: number = Date.now();
+const INTERVAL: number = 1000 * 60 * 5;
+
+export const getRemoveTime = () => {
+  const start = moment();
+  const end = moment(time + INTERVAL);
+  const diff = end.diff(start);
+  return moment(diff).format('mm:ss');
+};
+
 setInterval(async () => {
   try {
     if (!queue.length) return;
 
     if (isActive) return;
+    time = Date.now();
+
     isActive = true;
     let queuePart = [...queue];
     queue = [];
@@ -99,4 +112,4 @@ setInterval(async () => {
     console.log('INTERVAL');
     console.log(error);
   }
-}, 1000 * 10 * 1);
+}, INTERVAL);
