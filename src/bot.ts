@@ -82,15 +82,10 @@ bot.launch().then(() => {
 
 let isActive = false;
 
-let time: number = Date.now();
-const INTERVAL: number = 1000 * 60 * 5;
+export let time: number = Date.now();
+export const INTERVAL: number = 1000 * 60 * 5;
 
-export const getRemoveTime = () => {
-  const start = moment();
-  const end = moment(time + INTERVAL);
-  const diff = end.diff(start);
-  return moment(diff).format('mm:ss');
-};
+
 
 setInterval(async () => {
   try {

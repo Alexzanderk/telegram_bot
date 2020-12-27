@@ -1,50 +1,16 @@
 import { TelegrafContext } from 'telegraf/typings/context';
 import { commands } from '../commands';
 import { readFileSync } from 'fs';
-import { bot, queue, MessageQueue, getRemoveTime } from '../bot';
+import { bot, queue, MessageQueue, time, INTERVAL } from '../bot';
 import path from 'path';
 import { Message } from 'telegraf/typings/telegram-types';
-
-const startMessage = `
-Привет! Это бот🤖, который поможет ответить на уже известные вопросы, а также сообщить о ЧП в ЖК.
-Сейчас бот знает эти команды:
-/start Все команды
-/index Почтовый интдекс ЖК
-/contacts Контакты ЖЭКа
-/providers Интернет провайдеры в ЖК
-/price Цены услуг ЖЭКа
-/keys Ключи для лифтов, колясочной, входной двери
-/emergency ЧП в ЖК - теперь можно отправить в ЖЭК, команда работает в личных сообщениях для этого начните общение с ботом, кликай 👉🏻 @seven_security_bot. При вызове команды вы получите инструкцию📝 как сообщить о ЧП.
-⚠️ Просьба сообщать о ЧП и не писать 🚫 глупости
-`;
-
-const emergencyNotPrivate = (remainingTime: string) => `
-⚠️
-/emergency ЧП в ЖК - теперь можно отправить в ЖЭК, команда работает в личных сообщениях для этого начните общение с ботом, кликай 👉🏻 @seven_security_bot. При вызове команды вы получите инструкцию📝 как сообщить о ЧП.
-⚠️ Просьба сообщать о ЧП и не писать 🚫 глупости
-
-Сообщение с запросом будет удалено автоматически, приблизительно через: ${remainingTime}
-`;
-
-const code403 = `
-🎉
-Привет! Кажется слишком много одинаковых запросов в общей группе 😳 за короткий промежуток времени🤯, чтобы не мусорить в группе я могу отправить информацию лично, но для этого необходимо начать со мной общение. Кликни по этой ссылке и я постараюсь тебе помочь @seven_security_bot.
-Сообщения удаляются автоматически.
-`;
-
-const messageOnPause = (remainingTime: string) => `
-⚠️
-😱Wow... Take it easy guys🥂! В течении 30 мин команда вызывалась кем-то.
-Начни личное общение, кликай 👉🏻 @seven_security_bot
-В личных сообщениях нет ограничений на команды.😎
-
-Сообщение с запросом будет удалено автоматически, приблизительно через: ${remainingTime}
-`;
+import { getRemoveTime } from '../helpers';
+import { messageOnPause, startMessage, code403, emergencyNotPrivate } from '../messages';
 
 export const handleStartCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
     try {
-      const answer = await ctx.reply(messageOnPause(getRemoveTime()));
+      const answer = await ctx.reply(messageOnPause(getRemoveTime(time, INTERVAL)));
       removeMessageAddToQueue(ctx, answer);
       return;
     } catch (error) {
@@ -60,7 +26,7 @@ export const handleStartCommand = async (ctx: TelegrafContext) => {
 export const handleIndexCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
     try {
-      const answer = await ctx.reply(messageOnPause(getRemoveTime()));
+      const answer = await ctx.reply(messageOnPause(getRemoveTime(time, INTERVAL)));
       removeMessageAddToQueue(ctx, answer);
       return;
     } catch (error) {
@@ -77,7 +43,7 @@ export const handleIndexCommand = async (ctx: TelegrafContext) => {
 export const handleContactsCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
     try {
-      const answer = await ctx.reply(messageOnPause(getRemoveTime()));
+      const answer = await ctx.reply(messageOnPause(getRemoveTime(time, INTERVAL)));
       removeMessageAddToQueue(ctx, answer);
       return;
     } catch (error) {
@@ -94,7 +60,7 @@ export const handleContactsCommand = async (ctx: TelegrafContext) => {
 export const handleProvidersCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
     try {
-      const answer = await ctx.reply(messageOnPause(getRemoveTime()));
+      const answer = await ctx.reply(messageOnPause(getRemoveTime(time, INTERVAL)));
       removeMessageAddToQueue(ctx, answer);
       return;
     } catch (error) {
@@ -140,7 +106,7 @@ export const handlePriceCommand = async (ctx: TelegrafContext) => {
 export const handleKeysCommand = async (ctx: TelegrafContext) => {
   if ((ctx as any)?.state?.onPause) {
     try {
-      const answer = await ctx.reply(messageOnPause(getRemoveTime()));
+      const answer = await ctx.reply(messageOnPause(getRemoveTime(time, INTERVAL)));
       removeMessageAddToQueue(ctx, answer);
       return;
     } catch (error) {
@@ -159,7 +125,7 @@ export const handleEmergency = async (ctx: TelegrafContext) => {
     return ctx.telegram.sendMessage(ctx.from.id, commands.emergency);
   }
 
-  const answer = await ctx.reply(emergencyNotPrivate(getRemoveTime()));
+  const answer = await ctx.reply(emergencyNotPrivate(getRemoveTime(time, INTERVAL)));
   removeMessageAddToQueue(ctx, answer);
 };
 
